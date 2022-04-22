@@ -24,7 +24,7 @@ def read_text(file_path):
         line = text.readline()#.rstrip()
         if not line:
             break
-        print(line)
+        # print(line)
         line_content.append(line.rstrip())
         total += line
         line_info[line_idx]['idx'] = (init_len, init_len + len(line))
@@ -51,8 +51,13 @@ def fill_relation(relations, line_info):
 
     for idx, (s_idx, e_idx) in line_vals.items():
         if s_idx <= f_start < e_idx:
+            if not(s_idx <= s_start < e_idx):
+                continue
             line_info[idx]['rel'].append(relations)
-            assert s_idx <= s_start < e_idx
+
+                # breakpoint()
+                # break
+            # assert s_idx <= s_start < e_idx
             break
 
 def return_idx(relations, rel_ent_idx):
@@ -75,17 +80,10 @@ def update_dict(data_dict, sen_idx, line_content, subj_info, obj_info, rel_name,
 
 ### read data
 
-with open('./test_data/annotations-legend.json') as f:
+with open('/opt/ml/test_data/BoostcampAI-NLP-03/annotations-legend.json') as f:
     relation_map = json.load(f)
 
-whole_data = {
-    'sentence': [],
-    'subject_entity' : [],
-    'object_entity': [],
-    'label':[],
-    'file_name':[],
-    'sent_idx':[]
-}
+
 
 def file_reads():
     import glob
@@ -99,15 +97,25 @@ base_json = "/opt/ml/test_data/BoostcampAI-NLP-03/ann.json/master/pool/"
 base_text = "/opt/ml/test_data/raw_data/"
 
 all_json, all_html = file_reads()
+
 print(len(all_json), len(all_html))
 # assert len(all_json) == len(all_html)
 del_ent = ['e_90', 'e_92','e_141']
 for itr, h_idx in enumerate(range(len(all_html))):
+    whole_data = {
+        'sentence': [],
+        'subject_entity': [],
+        'object_entity': [],
+        'label': [],
+        'file_name': [],
+        'sent_idx': []
+    }
     # if itr ==1:
     #     break
     # json_path = './test_data/earth.json'
     # txt_path = './test_data/earth.txt'
     print(all_html[h_idx])
+
     html_file = open(all_html[h_idx])
     html_content = html_file.read()
     start = html_content.find('data-origid=') + len('data-origid=')
@@ -120,9 +128,16 @@ for itr, h_idx in enumerate(range(len(all_html))):
     specific_json = all_html[h_idx].split('/')[-1].split('plain')[0]
     json_path = os.path.join(base_json, specific_json + 'ann.json')
     save_name = f"{test_name}.csv"
+
+    print(test_name)
+    print(json_path)
+
+    # breakpoint()
     try:
         json_data = read_json(json_path)
     except:
+        print('blocked')
+        breakpoint()
         continue
     line_info, line_content = read_text(txt_path)
     file_name = (txt_path.split('/')[-1], json_path.split('/')[-1])
@@ -160,7 +175,7 @@ for itr, h_idx in enumerate(range(len(all_html))):
                     if (entity['classId'], int(entity['offsets'][0]['start'])) == (first_ent_leg, f_idx):
                         if entity['classId'] in del_ent:
                             do = False
-
+                            breakpoint()
                             continue
 
                         first_info = relation_map[entity['classId']].split('-')
@@ -170,6 +185,7 @@ for itr, h_idx in enumerate(range(len(all_html))):
                         del_list.append(e_idx)
                     elif (entity['classId'], int(entity['offsets'][0]['start'])) == (second_ent_leg, s_idx):
                         if entity['classId'] in del_ent:
+                            breakpoint()
                             do = False
                             continue
 
@@ -191,6 +207,7 @@ for itr, h_idx in enumerate(range(len(all_html))):
                     raise NotImplementedError
 
                 # relation 처리
+
                 assert subj_info[2] == obj_info[2]
                 rel_name = f'{subj_info[1].lower()}:{subj_info[2]}'#subj_info[2]
 
@@ -207,7 +224,7 @@ for itr, h_idx in enumerate(range(len(all_html))):
                 print(line_k)
                 continue
 
-            print('no_relation happen')
+            # print('no_relation happen')
             # assert len(left_ent) ==2
             f = left_ent[0]
             s = left_ent[1]
@@ -226,6 +243,7 @@ for itr, h_idx in enumerate(range(len(all_html))):
                 if do:
                     if (entity['classId'], int(entity['offsets'][0]['start'])) == (first_ent_leg, f_idx):
                         if entity['classId'] in del_ent:
+                            breakpoint()
                             do = False
                             continue
                         first_info = relation_map[entity['classId']].split('-')
@@ -234,6 +252,7 @@ for itr, h_idx in enumerate(range(len(all_html))):
 
                     elif (entity['classId'], int(entity['offsets'][0]['start'])) == (second_ent_leg, s_idx):
                         if entity['classId'] in del_ent:
+                            breakpoint()
                             do = False
                             continue
                         second_info = relation_map[entity['classId']].split('-')
@@ -261,6 +280,9 @@ for itr, h_idx in enumerate(range(len(all_html))):
     ### done
     results = pd.DataFrame.from_dict(whole_data)
     new_name = save_name.split('.')[0]
+    print(f'{new_name} done / len: ({len(whole_data["label"])})' )
+
+
     results.to_csv(os.path.join('/opt/ml/test_data/csv_data', new_name+'.csv'))
 
 

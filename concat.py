@@ -10,9 +10,9 @@ for csv_path in all_csv:
 concat = pd.concat(pd_list,ignore_index=True)
 concat['id'] = concat.index
 
-concat.to_csv('/opt/ml/test_data/nlp3_all_data.csv')
+concat.to_csv('/opt/ml/test_data/nlp3_all_data_new.csv')
 
-labels = [
+labels =[
     'no_relation',
     'dat:alter_name',
     'dat:feature',
@@ -21,9 +21,6 @@ labels = [
     'idv:alter_name',
     'idv:feature',
     'idv:location',
-    'idv:outbreak_date',
-    'idv:parent_con',
-    'idv:influence',
     'idv:parent_con',
     'idv:influence',
 
@@ -39,7 +36,7 @@ labels = [
     'res:influence',
     'res:outbreak_date',
     'res:alter_name'
-]
+    ]
 print(len(labels))
 import pickle
 
